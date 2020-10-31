@@ -50,7 +50,7 @@ VS.par.NSKToolBoxMainDir=fileparts(which('identifierOfMainDir4NSKToolBox'));
 VS.par.dirSep=filesep; %choose file/dir separator according to platform
 
 %collect all visual stimulation patterns
-VS.par.VSDirectory=[VS.par.NSKToolBoxMainDir VS.par.dirSep 'VisualStimulation'];
+VS.par.VSDirectory=[VS.par.NSKToolBoxMainDir];
 VS.par.VSObjDir=[VS.par.VSDirectory VS.par.dirSep 'VStim'];
 VS.par.PCspecificFilesDir=[VS.par.NSKToolBoxMainDir VS.par.dirSep 'PCspecificFiles'];
 

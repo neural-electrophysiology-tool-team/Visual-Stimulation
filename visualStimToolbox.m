@@ -420,13 +420,16 @@ end
 
     function CallbackEstimateStimDurationPush(hObj,event)
         estimatedTime=VS.par.VSO.estimateProtocolDuration;
+        hrs = floor(estimatedTime/3600);
+        mnts = floor((estimatedTime/60)-(hrs*60));
+        scs = estimatedTime-(mnts*60)-(hrs*3600);
         if isnan(estimatedTime)
             disp(['Estimation method non functional']);
             return;
         end
         currentTime=clock;
         outputTimeStr={['Current time: ' datestr(now)]...
-            ['Estimated visual stimulation duration: ' num2str(estimatedTime/3600) ' hours'],...
+            ['Estimated visual stimulation duration: ' num2str(hrs,'%02.f') ':' num2str(mnts,'%02.f') ':' num2str(scs,'%02.f') ],...
             ['Estimated stimulation end: ' datestr(datenum(now)+datenum([0 0 0 0 0 estimatedTime]))]};
         disp(outputTimeStr(:));
         h=msgbox(outputTimeStr,'VS estimated duration','help','replace');

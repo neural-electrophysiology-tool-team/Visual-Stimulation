@@ -3,6 +3,7 @@ classdef VS_fullFieldFlash < VStim
         flashLuminosity = 255; %(L_high-L_low)/L_low
         randomize = true;
         equalize = false; %Make distribution of intenisty diffs more uniform by adding large diffs. Currently all added diffs will have inter trial delay of obj.interTrialDelay(1)
+        autoSyncSquare = false; %automatically reset the luminosity of syncSquare to contrast the background
         Back2Background=true; %display images between luminosities
         screenTriggerDuration=0.1; %sec
     end
@@ -79,6 +80,16 @@ classdef VS_fullFieldFlash < VStim
                 end
             end
             obj.luminosities=[obj.luminosities obj.luminosities(1)]; %adding last luminocity value which will never be shown
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
             
             %Pre allocate memory for variables
             obj.on_Flip=nan(1,obj.nTotTrials);

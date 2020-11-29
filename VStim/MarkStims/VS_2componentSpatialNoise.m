@@ -4,6 +4,7 @@ classdef VS_2componentSpatialNoise < VStim
         %Place all other variables in hidden properties
         %test
         meanLuminosity = 128;
+        autoSyncSquare = true;
         contrast = 1;
         largeRectNum=10;
         smallRectNum=100;
@@ -136,6 +137,17 @@ classdef VS_2componentSpatialNoise < VStim
             
            % save tmpVSFile obj; %temporarily save object in case of a crash
             disp('Session starting');
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (sometimes this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;

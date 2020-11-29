@@ -9,6 +9,7 @@ classdef VS_oddBall < VStim
         afterRepeats = 5;
         oddBallPercent=20;
         randomize = true;
+        autoSyncSquare = true;
         interStimulusDelay=.5;
     end
     properties (Constant)
@@ -127,6 +128,17 @@ classdef VS_oddBall < VStim
             
             obj.pos2X=obj.pos2X-min(obj.pos2X)+1;
             obj.pos2Y=obj.pos2Y-min(obj.pos2Y)+1;
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (sometimes this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;

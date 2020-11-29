@@ -2,6 +2,7 @@ classdef VS_loomingCircleSound < VStim
     properties (SetAccess=public)
         circleColor = [255 0 0];
         randomizeCircleColor = true;
+        autoSyncSquare = true;
         
         initialXYPosition = [0 0];
         randomizeInitialPositions = true;
@@ -120,7 +121,18 @@ classdef VS_loomingCircleSound < VStim
             movementDuration=maxFrames*obj.ifi(obj.selectedScreen);
             t=(obj.ifi(obj.selectedScreen):obj.ifi(obj.selectedScreen):movementDuration);
             nFrames=numel(t);
-                        
+             
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
+            
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.syncMarkerOn = false; %initialize sync signal
             Screen('FillRect',obj.PTB_win(obj.selectedScreen),obj.visualFieldBackgroundLuminance);

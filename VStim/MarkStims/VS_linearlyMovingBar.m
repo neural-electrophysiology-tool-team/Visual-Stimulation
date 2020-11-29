@@ -7,6 +7,7 @@ classdef VS_linearlyMovingBar < VStim
         parallelsOffset = 0;
         skipFrames=0;
         randomize = true;
+        autoSyncSquare = true;
         speed = 500; %pixel per second
         rotation = 0;
     end
@@ -72,6 +73,17 @@ classdef VS_linearlyMovingBar < VStim
                 obj.offsets=obj.offsets(randomPermutation);
                 obj.directions=obj.directions(randomPermutation);
             end
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (sometimes this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;

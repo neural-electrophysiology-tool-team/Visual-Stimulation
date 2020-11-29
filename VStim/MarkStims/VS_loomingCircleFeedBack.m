@@ -3,6 +3,7 @@ classdef VS_loomingCircleFeedBack < VStim
         
         CSDuration = 1;
         preCSCameraTrigger = 300;
+        autoSyncSquare = true;
         
         circleColor = [255 0 0];
         randomizeCircleColor = true;
@@ -161,7 +162,18 @@ classdef VS_loomingCircleFeedBack < VStim
             movementDuration=maxFrames*obj.ifi;
             t=(obj.ifi:obj.ifi:movementDuration);
             nFrames=numel(t);
-                        
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
+            
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.syncMarkerOn = false; %initialize sync signal
             Screen('FillRect',obj.PTB_win,obj.visualFieldBackgroundLuminance);

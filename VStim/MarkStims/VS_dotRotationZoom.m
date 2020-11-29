@@ -2,6 +2,7 @@ classdef VS_dotRotationZoom < VStim
     properties (SetAccess=public)
         dotLuminosity = 255; %(L_high-L_low)/L_low
         randomize = true;
+        autoSyncSquare = true;
         speed = 100; %pixel per second
         nDots= 1000 % number of dots
         dotSize= 5 % width of dot (pixels)
@@ -66,6 +67,17 @@ classdef VS_dotRotationZoom < VStim
                 obj.rotateZoom=obj.rotateZoom(randomPermutation);
                 obj.directions=obj.directions(randomPermutation);
             end
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.syncMarkerOn = false; %initialize sync signal

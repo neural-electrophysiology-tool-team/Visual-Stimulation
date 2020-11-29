@@ -2,6 +2,7 @@ classdef VS_TwoMoviesKeyPress < VStim
     properties (SetAccess=public)
         playAsImgSequence = true;
         randomize = true;
+        autoSyncSquare = true;
         loops = 1;
         skipFrames = 0;
         initialFrozenFrames = 0;
@@ -58,6 +59,17 @@ classdef VS_TwoMoviesKeyPress < VStim
                 randomPermutation=randperm(obj.nTotTrials);
                 obj.movieSequence=obj.movieSequence(randomPermutation);
             end
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.syncMarkerOn = false;

@@ -3,6 +3,7 @@ classdef VS_driftingGrating < VStim
         %all these properties are modifiable by user and will appear in visual stim GUI
         %Place all other variables in hidden properties
         angles=12;
+        autoSyncSquare = true;
         minFreq=.1;
         maxFreq=2;
         freqStep=.3;
@@ -94,6 +95,17 @@ classdef VS_driftingGrating < VStim
             obj.stimOnset=nan(obj.trialsPerCategory,numFrames);          %estimate of stim onset
             obj.flipOffsetTimeStamp=nan(obj.trialsPerCategory,numFrames);  %flip done
             obj.flipMiss=nan(obj.trialsPerCategory,numFrames);
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             WaitSecs(obj.preSessionDelay);
             obj.sendTTL(1,true);

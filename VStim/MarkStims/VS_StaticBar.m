@@ -6,6 +6,7 @@ classdef VS_StaticBar < VStim
         numberOfDirections = 8;
         parallelsOffset = 0;
         randomize = true;
+        autoSyncSquare = true;
         rotation = 0;
     end
     properties (Hidden,Constant)
@@ -64,6 +65,17 @@ classdef VS_StaticBar < VStim
                 obj.offsets=obj.offsets(randomPermutation);
                 obj.directions=obj.directions(randomPermutation);
             end
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (sometimes this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;

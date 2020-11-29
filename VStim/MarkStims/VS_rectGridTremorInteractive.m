@@ -2,6 +2,7 @@ classdef VS_rectGridTremorInteractive < VStim
     properties (SetAccess=public)
         rectLuminosity = 255; %(L_high-L_low)/L_low
         rectGridSize = 4;
+        autoSyncSquare = true;
         tilingRatio = 1;
         rotation = 0;
         tremorPixels = 2;
@@ -66,6 +67,17 @@ classdef VS_rectGridTremorInteractive < VStim
             
             obj.pos2X=obj.pos2X-min(obj.pos2X)+1;
             obj.pos2Y=obj.pos2Y-min(obj.pos2Y)+1;
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;

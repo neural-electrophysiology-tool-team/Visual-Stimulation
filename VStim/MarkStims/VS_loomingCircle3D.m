@@ -4,6 +4,7 @@ classdef VS_loomingCircle3D < VStim
         ballLuminocity = 0;        
         initialXYZPosition = [0.5 0.5 100];
         randomizeInitialPositions = true;
+        autoSyncSquare  = true;
         
         circleVelocityXYZ = [0 0 -20];
         randomizeCircleVelocity = true;
@@ -108,6 +109,17 @@ classdef VS_loomingCircle3D < VStim
                 randomPermutation=randperm(obj.nTotTrials);
                 obj.initialPositionSequence=obj.initialPositionSequence(:,randomPermutation);
             end
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             obj.syncMarkerOn = false; %initialize sync signal

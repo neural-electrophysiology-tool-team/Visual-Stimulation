@@ -15,6 +15,7 @@ classdef VS_manualDynamicCircles < VStim
         cycles=10;
         repeatSequence=1;
         randomizeOrder = true;
+        autoSyncSquare = true;
         
         circleDiameter = 100;
         circlePositionsX = 600;
@@ -77,6 +78,17 @@ classdef VS_manualDynamicCircles < VStim
             end
             save([obj.mainDir(1:end-5) 'stats' filesep 'tmpVSFile']); %temporarily save object in case of a crash
             disp('Session starting');
+            
+            %Auto-contrast syncSquare: chnage lumonisty and re-initialize background to re-apply the mask
+            if obj.autoSyncSquare
+                if obj.visualFieldBackgroundLuminance <=127
+                    obj.syncSquareLuminosity = 255;
+                else
+                    obj.syncSquareLuminosity = 0;
+                end
+                obj.initializeBackground;
+            end
+            
             
             %run test Flip (usually this first flip is slow and so it is not included in the anlysis
             Screen('Flip',obj.PTB_win);

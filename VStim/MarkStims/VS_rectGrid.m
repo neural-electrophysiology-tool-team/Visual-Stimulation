@@ -3,6 +3,7 @@ classdef VS_rectGrid < VStim
         rectLuminosity = 255; %(L_high-L_low)/L_low
         rectGridSize = 4;
         randomize = true;
+        autoSyncSquare = false;
         tilingRatio = 1;
         rotation = 0;
     end

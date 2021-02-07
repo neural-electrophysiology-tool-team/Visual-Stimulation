@@ -85,13 +85,16 @@ classdef (Abstract) VStim < handle
     methods
         %class constractor
         function obj=VStim(PTB_WindowPointer,interactiveGUIhandle)
-            addlistener(obj,'visualFieldBackgroundLuminance','PostSet',@obj.initializeBackground); %add a listener to visualFieldBackgroundLuminance, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'horizontalShift','PostSet',@obj.initializeBackground); %add a listener to visualFieldBackgroundLuminance, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'visualFieldDiameter','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'DMDcorrectionIntensity','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'inVivoSettings','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'backgroundMaskSteepness','PostSet',@obj.initializeBackground); %add a listener to backgroundMaskSteepness, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'stimDuration','PostSet',@obj.updateActualStimDuration); %add a listener to stimDuration, after its changed its size is updated in the changedDataEvent method
+            %adding listeners that track property changes (usually when
+            %setting values in GUI) and then activate the relevant methods
+            %to apply changes to the stimulation object.
+            addlistener(obj,'visualFieldBackgroundLuminance','PostSet',@obj.initializeBackground); %add a listener to visualFieldBackgroundLuminance, after it's changed its size is updated in the relevant method
+            addlistener(obj,'horizontalShift','PostSet',@obj.initializeBackground); %add a listener to visualFieldBackgroundLuminance, after its changed it's size is updated in the relevant method
+            addlistener(obj,'visualFieldDiameter','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after it's changed its size is updated in the relevant method
+            addlistener(obj,'DMDcorrectionIntensity','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after it's changed its size is updated in the relevant method
+            addlistener(obj,'inVivoSettings','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed it's size is updated in the relevant method
+            addlistener(obj,'backgroundMaskSteepness','PostSet',@obj.initializeBackground); %add a listener to backgroundMaskSteepness, after it's changed its size is updated in the relevant method
+            addlistener(obj,'stimDuration','PostSet',@obj.updateActualStimDuration); %add a listener to stimDuration, after it's changed its size is updated in the relevant method
             addlistener(obj, 'numPixels', 'PostSet', @(src,event)disp([num2str(obj.numPixels), ' is ', num2str(obj.numPixels*obj.pixelConversionFactor), ' microns'])); 
             addlistener(obj, 'numMicrons', 'PostSet', @(src,event)disp([num2str(obj.numMicrons), ' is ', num2str(obj.numMicrons/obj.pixelConversionFactor), ' pixels']));
             obj.nPTBScreens=numel(PTB_WindowPointer);

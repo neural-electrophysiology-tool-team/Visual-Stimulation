@@ -281,7 +281,7 @@ classdef (Abstract) VStim < handle
         end
         
         function initializeTTL(obj)
-            testPCList={'DESKTOP-H2D3EI2','MARKSNB'}; %list of PCs with no parallel port for testing! Triggers will display on screen! 
+            testPCList={'DESKTOP-H2D3EI2','MARKSNB','msi-compute-server'}; %list of PCs with no parallel port for testing! Triggers will display on screen! 
             if ispc
                 if any(strcmp(getenv('COMPUTERNAME'),testPCList))% for the case where there is no parallel port
                     obj.OSPlatform=3;
@@ -289,11 +289,8 @@ classdef (Abstract) VStim < handle
                     obj.OSPlatform=1;
                 end
             else
-                if any(strcmp(obj.computerName,['msi-compute-server' char(10)]))
-                    obj.OSPlatform=3;
-                else
-                    obj.OSPlatform=2;
-                end
+                if obj.computerName=='msi-compute-server'
+                obj.OSPlatform=2;
             end
             
             if obj.OSPlatform==1 %window

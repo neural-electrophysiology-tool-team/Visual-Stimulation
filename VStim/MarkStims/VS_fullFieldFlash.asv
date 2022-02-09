@@ -129,7 +129,7 @@ classdef VS_fullFieldFlash < VStim
                     WaitSecs(obj.stimDuration - obj.screenTriggerDuration);
                 end
                 % Update image buffer
-                Screen('FillRect',obj.PTB_win,obj.luminosities(i+1),obj.rect);
+                Screen('FillRect',obj.PTB_win,obj.luminosities(i+1),obj.visualFieldRect);
                 obj.applyBackgound; %set background mask and finalize drawing (drawing finished)
                 disp(['Trial ' num2str(i) '/' num2str(obj.nTotTrials)]);
                 

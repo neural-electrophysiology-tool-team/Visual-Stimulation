@@ -12,7 +12,7 @@ classdef (Abstract) VStim < handle
     properties (SetObservable, AbortSet = true, SetAccess=public)
         visualFieldBackgroundLuminance  = 0; %mean grey value measured by SR and AH the 04-12-19 136
         visualFieldDiameter             = 0; %pixels
-        inVivoSettings                  = false;
+        showOnFullScreen                = true;
         DMDcorrectionIntensity          = 0;
         stimDuration                    = 2;
         backgroundMaskSteepness         = 0.2;
@@ -91,7 +91,7 @@ classdef (Abstract) VStim < handle
             addlistener(obj,'horizontalShift','PostSet',@obj.initializeBackground); %add a listener to visualFieldBackgroundLuminance, after its changed its size is updated in the changedDataEvent method
             addlistener(obj,'visualFieldDiameter','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
             addlistener(obj,'DMDcorrectionIntensity','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
-            addlistener(obj,'inVivoSettings','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
+            addlistener(obj,'showOnFullScreen','PostSet',@obj.initializeBackground); %add a listener to visualFieldDiameter, after its changed its size is updated in the changedDataEvent method
             addlistener(obj,'backgroundMaskSteepness','PostSet',@obj.initializeBackground); %add a listener to backgroundMaskSteepness, after its changed its size is updated in the changedDataEvent method
             addlistener(obj,'stimDuration','PostSet',@obj.updateActualStimDuration); %add a listener to stimDuration, after its changed its size is updated in the changedDataEvent method
             addlistener(obj, 'numPixels', 'PostSet', @(src,event)disp([num2str(obj.numPixels), ' is ', num2str(obj.numPixels*obj.pixelConversionFactor), ' microns'])); 
@@ -185,11 +185,9 @@ classdef (Abstract) VStim < handle
         end
         
         function initializeBackground(obj,event,metaProp)
-            noMask=false;
             if obj.visualFieldDiameter==0
                 obj.actualVFieldDiameter=min(obj.rect(1,3)-obj.rect(1,1),obj.rect(1,4)-obj.rect(1,2));
             elseif obj.visualFieldDiameter==-1
-                noMask=true;
                 obj.actualVFieldDiameter=min(obj.rect(1,3)-obj.rect(1,1),obj.rect(1,4)-obj.rect(1,2));
             else
                 obj.actualVFieldDiameter=obj.visualFieldDiameter;
@@ -207,18 +205,14 @@ classdef (Abstract) VStim < handle
             
             maskblobOff=ones(obj.rect(4)-obj.rect(2),obj.rect(3)-obj.rect(1),2) * obj.whiteIdx;
             maskblobOff(:,:,1)=obj.visualFieldBackgroundLuminance; %obj.blackIdx
-            if ~noMask 
-                maskblobOff((obj.visualFieldRect(2)+1):obj.visualFieldRect(4),(obj.visualFieldRect(1)+1):obj.visualFieldRect(3),2)=sig(x,y)*obj.whiteIdx;
-            else
-                maskblobOff(:,:,2)=0;
-            end
-            
+            maskblobOff((obj.visualFieldRect(2)+1):obj.visualFieldRect(4),(obj.visualFieldRect(1)+1):obj.visualFieldRect(3),2)=sig(x,y)*obj.whiteIdx;
+
             if obj.DMDcorrectionIntensity
                 [~,maskblobOff(:,:,2)]=meshgrid(1:size(maskblobOff,2),1:size(maskblobOff,1));
                 maskblobOff(:,:,2)=maskblobOff(:,:,2)/max(max(maskblobOff(:,:,2)))*255;                
             end
             
-            if obj.inVivoSettings==1
+            if obj.showOnFullScreen==1
                 maskblobOff=ones(obj.rect(1,4)-obj.rect(1,2),obj.rect(1,3)-obj.rect(1,1),2) * obj.blackIdx;
                 maskblobOff(:,:,1)=obj.blackIdx;
             end

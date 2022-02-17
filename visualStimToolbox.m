@@ -27,13 +27,30 @@ for k=1:2:nargin
     eval([varargin{k} '=' 'varargin{k+1};']);
 end
 
+%% Check GUI layout installation
+%Check that GUI layout is installed and if not install it
+installGUILayoutToolBox=false;
+toolboxes = matlab.addons.toolbox.installedToolboxes;
+if isempty(toolboxes)
+    installGUILayoutToolBox=1;
+else
+    if ~any(strcmp(toolboxes.Name,'GUI Layout Toolbox'))
+        installGUILayoutToolBox=1;
+    end
+end
+if installGUILayoutToolBox
+    disp('GUI Layout toolbox is not installed, trying to install...');
+    d=which('GUI Layout Toolbox 2.3.4.mltbx');
+    installedToolbox = matlab.addons.toolbox.installToolbox(d,true);
+end
+
 %% %%%%%%%%%%%%%%%% Parameter definitions  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 VS.hand.hMainFigure=figure; %initialize GUI figure
 VS.par.NSKToolBoxMainDir=fileparts(which('identifierOfMainDir4NSKToolBox'));
 VS.par.dirSep=filesep; %choose file/dir separator according to platform
 
 %collect all visual stimulation patterns
-VS.par.VSDirectory=[VS.par.NSKToolBoxMainDir ];
+VS.par.VSDirectory=fileparts(which('visualStimToolbox.m'));
 VS.par.VSObjDir=[VS.par.VSDirectory VS.par.dirSep 'VStim'];
 VS.par.PCspecificFilesDir=[VS.par.NSKToolBoxMainDir VS.par.dirSep 'PCspecificFiles'];
 
@@ -371,6 +388,9 @@ end
             saveFile=[VS.par.VSDirectory '\stats\' VS.par.VSObjNames{VS.par.currentVSO} '_' timeString];
         end
         
+        %Add screen location to visual stimulation object
+        VS.par.VSO.screenPositionsMatlab=VS.par.screenPositionsMatlab;
+        
         %run visual stimulation
         VS.par.VSO=VS.par.VSO.run;
         
@@ -403,13 +423,16 @@ end
 
     function CallbackEstimateStimDurationPush(hObj,event)
         estimatedTime=VS.par.VSO.estimateProtocolDuration;
+        hrs = floor(estimatedTime/3600);
+        mnts = floor((estimatedTime/60)-(hrs*60));
+        scs = estimatedTime-(mnts*60)-(hrs*3600);
         if isnan(estimatedTime)
             disp(['Estimation method non functional']);
             return;
         end
         currentTime=clock;
         outputTimeStr={['Current time: ' datestr(now)]...
-            ['Estimated visual stimulation duration: ' num2str(estimatedTime/3600) ' hours'],...
+            ['Estimated visual stimulation duration: ' num2str(hrs,'%02.f') ':' num2str(mnts,'%02.f') ':' num2str(scs,'%02.f') ],...
             ['Estimated stimulation end: ' datestr(datenum(now)+datenum([0 0 0 0 0 estimatedTime]))]};
         disp(outputTimeStr(:));
         h=msgbox(outputTimeStr,'VS estimated duration','help','replace');

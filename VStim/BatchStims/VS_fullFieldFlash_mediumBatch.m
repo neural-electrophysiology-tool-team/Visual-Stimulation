@@ -1,6 +1,6 @@
-classdef VS_fullFieldFlash < VStim
+classdef VS_fullFieldFlash_mediumBatch < VStim
     properties (SetAccess=public)
-        flashLuminosity = 255; %(L_high-L_low)/L_low
+        flashLuminosity = [0 69 127 184 255]; %(L_high-L_low)/L_low
         randomize = true;
         equalize = false; %Make distribution of intenisty diffs more uniform by adding large diffs. Currently all added diffs will have inter trial delay of obj.interTrialDelay(1)
         Back2Background=true; %display images between luminosities
@@ -102,7 +102,7 @@ classdef VS_fullFieldFlash < VStim
 
             % Update image buffer for the first time
             obj.syncMarkerOn = false; %reset sync marker
-            Screen('FillRect',obj.PTB_win,obj.luminosities(1),obj.rect);
+            Screen('FillOval',obj.PTB_win,obj.luminosities(1),obj.visualFieldRect);
             obj.applyBackgound;  %set background mask and finalize drawing (drawing finished)
                         
             %main loop - start the session
@@ -119,7 +119,7 @@ classdef VS_fullFieldFlash < VStim
                 obj.sendTTL(2,true);
                 if obj.Back2Background %Display background between luminosities
                     % Update display
-                    Screen('FillRect',obj.PTB_win,obj.visualFieldBackgroundLuminance,obj.rect);
+                    Screen('FillOval',obj.PTB_win,obj.visualFieldBackgroundLuminance,obj.visualFieldRect);
                     obj.applyBackgound; %set background mask and finalize drawing (drawing finished)
                     [obj.off_Flip(i),obj.off_Stim(i),obj.off_FlipEnd(i),obj.off_Miss(i)]=Screen('Flip',obj.PTB_win,obj.on_Flip(i)+obj.actualStimDuration-0.5*obj.ifi);
                     obj.sendTTL(2,false);
@@ -129,7 +129,7 @@ classdef VS_fullFieldFlash < VStim
                     WaitSecs(obj.stimDuration - obj.screenTriggerDuration);
                 end
                 % Update image buffer
-                Screen('FillRect',obj.PTB_win,obj.luminosities(i+1),obj.rect);
+                Screen('FillOval',obj.PTB_win,obj.luminosities(i+1),obj.visualFieldRect);
                 obj.applyBackgound; %set background mask and finalize drawing (drawing finished)
                 disp(['Trial ' num2str(i) '/' num2str(obj.nTotTrials)]);
                 
@@ -203,9 +203,12 @@ classdef VS_fullFieldFlash < VStim
             end
         end
         %class constractor
-        function obj=VS_fullFieldFlash(w,h)
+        function obj=VS_fullFieldFlash_mediumBatch(w,h)
             %get the visual stimulation methods
             obj = obj@VStim(w); %calling superclass constructor
+            obj.interTrialDelay = 10;
+            obj.stimDuration = 10;
+            obj.trialsPerCategory= 60;
         end
     end
 end %EOF

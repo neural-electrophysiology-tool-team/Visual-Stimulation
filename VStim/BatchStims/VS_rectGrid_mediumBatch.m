@@ -1,9 +1,9 @@
-classdef VS_rectGrid < VStim
+classdef VS_rectGrid_mediumBatch < VStim
     properties (SetAccess=public)
-        rectLuminosity = 255; %(L_high-L_low)/L_low
-        rectGridSize = 4;
+        rectLuminosity = [ 0 127 255]; %(L_high-L_low)/L_low
+        rectGridSize = 5;
         randomize = true;
-        tilingRatio = 1;
+        tilingRatio = 0.75;
         rotation = 0;
     end
     properties (Constant)
@@ -53,15 +53,11 @@ classdef VS_rectGrid < VStim
             Y3=Y1+rectSide-1;
             X4=X1;
             Y4=Y1+rectSide-1;
-            if ~obj.inVivoSettings
             obj.pValidRect=find( sqrt((X1-centerX).^2+(Y1-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
                 sqrt((X2-centerX).^2+(Y2-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
                 sqrt((X3-centerX).^2+(Y3-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
                 sqrt((X4-centerX).^2+(Y4-centerY).^2)<=(obj.actualVFieldDiameter/2));
-            else
-                obj.pValidRect=(1:numel(X1))';
-            end
-                
+            
             %move data to object
             obj.rectData.X1=X1;obj.rectData.Y1=Y1;
             obj.rectData.X2=X2;obj.rectData.Y2=Y2;
@@ -170,7 +166,7 @@ classdef VS_rectGrid < VStim
                 WaitSecs(obj.interTrialDelay-(GetSecs-obj.off_Flip(i)));
             end
             obj.pos(end)=[]; %remove the last stim which is not shown
-            obj.luminosities(end)=[];%remove the last stim which is not shown
+            luminosities(end)=[];%remove the last stim which is not shown
             
             WaitSecs(obj.postSessionDelay);
             obj.sendTTL(1,false); %session end trigger
@@ -272,9 +268,12 @@ classdef VS_rectGrid < VStim
             end
         end
         %class constractor
-        function obj=VS_rectGrid(w,h)
+        function obj=VS_rectGrid_mediumBatch(w,h)
             %get the visual stimulation methods
             obj = obj@VStim(w); %calling superclass constructor
+            obj.interTrialDelay = 10;
+            obj.stimDuration = 10;
+            obj.trialsPerCategory= 60;
         end
     end
 end %EOF

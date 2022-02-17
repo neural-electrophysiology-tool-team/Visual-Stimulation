@@ -49,7 +49,6 @@ Temporary Items
 
 # Directories to ignore
 ./PCspecificFiles
-PCspecificFiles
 **/VSConfig.txt
 **/GUIConfig.txt
 ./stats

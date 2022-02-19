@@ -50,7 +50,7 @@ VS.par.NSKToolBoxMainDir=fileparts(which('identifierOfMainDir4NSKToolBox'));
 VS.par.dirSep=filesep; %choose file/dir separator according to platform
 
 %collect all visual stimulation patterns
-VS.par.VSDirectory=[VS.par.NSKToolBoxMainDir];
+VS.par.VSDirectory=fileparts(which('visualStimToolbox.m'));
 VS.par.VSObjDir=[VS.par.VSDirectory VS.par.dirSep 'VStim'];
 VS.par.PCspecificFilesDir=[VS.par.NSKToolBoxMainDir VS.par.dirSep 'PCspecificFiles'];
 
@@ -387,6 +387,9 @@ end
             timeString=[timeString sec_ms];
             saveFile=[VS.par.VSDirectory '\stats\' VS.par.VSObjNames{VS.par.currentVSO} '_' timeString];
         end
+        
+        %Add screen location to visual stimulation object
+        VS.par.VSO.screenPositionsMatlab=VS.par.screenPositionsMatlab;
         
         %run visual stimulation
         VS.par.VSO=VS.par.VSO.run;

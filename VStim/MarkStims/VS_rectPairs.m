@@ -1,10 +1,11 @@
-classdef VS_rectGrid < VStim
+classdef VS_rectPairs < VStim
     properties (SetAccess=public)
         rectLuminosity = 255; %(L_high-L_low)/L_low
         rectGridSize = 4;
         randomize = true;
         tilingRatio = 1;
         rotation = 0;
+        pairsRatio = 0.5;
     end
     properties (Constant)
         rectLuminosityTxt='The luminocity value for the rectangles, if array->show all given contrasts';
@@ -53,15 +54,9 @@ classdef VS_rectGrid < VStim
             Y3=Y1+rectSide-1;
             X4=X1;
             Y4=Y1+rectSide-1;
-            if ~obj.inVivoSettings
-            obj.pValidRect=find( sqrt((X1-centerX).^2+(Y1-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
-                sqrt((X2-centerX).^2+(Y2-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
-                sqrt((X3-centerX).^2+(Y3-centerY).^2)<=(obj.actualVFieldDiameter/2) &...
-                sqrt((X4-centerX).^2+(Y4-centerY).^2)<=(obj.actualVFieldDiameter/2));
-            else
-                obj.pValidRect=(1:numel(X1))';
-            end
-                
+            %find rects that dont overlap with syncSquare
+            syncSquareSizePix   = 60;
+            obj.pValidRect=find(X1>syncSquareSizePix & Y3<(obj.actualVFieldDiameter-syncSquareSizePix));
             %move data to object
             obj.rectData.X1=X1;obj.rectData.Y1=Y1;
             obj.rectData.X2=X2;obj.rectData.Y2=Y2;
@@ -85,30 +80,46 @@ classdef VS_rectGrid < VStim
             
             nPositions=numel(obj.pValidRect);
             nLuminosities=numel(obj.rectLuminosity);
-            obj.nTotTrials=obj.trialsPerCategory*nLuminosities*nPositions;
+            pairs=nchoosek(1:nPositions,2);
+            totPairs=nchoosek(nPositions,2);
+            randPairs=randperm(totPairs);
+            permutPairs=pairs(randPairs,:);
+            nPairs=totPairs*obj.pairsRatio;
+            pairBank=permutPairs(1:nPairs,:);
+            obj.nTotTrials=(obj.trialsPerCategory*nLuminosities*nPositions+obj.trialsPerCategory*nLuminosities*nPairs);
             
             %calculate sequece of positions and times
-            obj.pos=nan(1,obj.nTotTrials);
+            obj.pos=nan(2,obj.nTotTrials);
             obj.luminosities=nan(1,obj.nTotTrials);
             c=1;
             for i=1:nPositions
                 for j=1:nLuminosities
-                    obj.pos( ((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=i;
+                    obj.pos( 1,((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=i;
+                    obj.luminosities( ((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=j;
+                    c=c+1;
+                end
+            end
+            obj.pos(2,1:nPositions*obj.trialsPerCategory)=0; %padding with zeros for one rect trials
+            for i=1:nPairs
+                for j=1:nLuminosities
+                    obj.pos(1,((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=pairBank(i,1);
+                    obj.pos(2,((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=pairBank(i,2);
                     obj.luminosities( ((c-1)*obj.trialsPerCategory+1):(c*obj.trialsPerCategory) )=j;
                     c=c+1;
                 end
             end
             if obj.randomize
                 randomPermutation=randperm(obj.nTotTrials);
-                obj.pos=obj.pos(randomPermutation);
+                obj.pos=obj.pos(:,randomPermutation);
                 obj.luminosities=obj.luminosities(randomPermutation);
             end
-            obj.pos=[obj.pos obj.pos(1)]; %add an additional stimulus that will never be shown
+            obj.pos=[obj.pos obj.pos(:,1)]; %add an additional stimulus that will never be shown
             obj.luminosities=[obj.luminosities obj.luminosities(1)]; %add an additional stimulus that will never be shown
             
             %run test Flip (sometimes this first flip is slow and so it is not included in the anlysis
             obj.visualFieldBackgroundLuminance=obj.visualFieldBackgroundLuminance;
-            
+
+            %obj.syncMarkerOn
             % Update image buffer for the first time
             for i=1:nPositions
                 for j=1:nLuminosities
@@ -117,7 +128,14 @@ classdef VS_rectGrid < VStim
                     imgTex(i,j)=Screen('MakeTexture', obj.PTB_win,I,obj.rotation);
                 end
             end
-            
+            for i=1:nPairs
+                for j=1:nLuminosities
+                    I=ones(obj.visualFieldRect(3)-obj.visualFieldRect(1),obj.visualFieldRect(4)-obj.visualFieldRect(2)).*obj.visualFieldBackgroundLuminance;
+                    I(obj.rectData.X1(obj.pValidRect(pairBank(i,1))):obj.rectData.X3(obj.pValidRect(pairBank(i,1))),obj.rectData.Y1(obj.pValidRect(pairBank(i,1))):obj.rectData.Y3(obj.pValidRect(pairBank(i,1))))=obj.rectLuminosity(j);
+                    I(obj.rectData.X1(obj.pValidRect(pairBank(i,2))):obj.rectData.X3(obj.pValidRect(pairBank(i,2))),obj.rectData.Y1(obj.pValidRect(pairBank(i,2))):obj.rectData.Y3(obj.pValidRect(pairBank(i,2))))=obj.rectLuminosity(j);
+                    imgTex2(i,j)=Screen('MakeTexture', obj.PTB_win,I,obj.rotation);
+                end
+            end
             %Pre allocate memory for variables
             obj.on_Flip=nan(1,obj.nTotTrials);
             obj.on_Stim=nan(1,obj.nTotTrials);
@@ -135,9 +153,15 @@ classdef VS_rectGrid < VStim
             save tmpVSFile obj; %temporarily save object in case of a system crash
             disp('Session starting');
             
-            Screen('DrawTexture',obj.PTB_win,imgTex(obj.pos(1),obj.luminosities(1)),[],obj.visualFieldRect,obj.rotation);
+            if obj.pos(2,1)==0
+                Screen('DrawTexture',obj.PTB_win,imgTex(obj.pos(1,1),obj.luminosities(1)),[],obj.visualFieldRect,obj.rotation);
+                
+            else
+                Screen('DrawTexture',obj.PTB_win,imgTex2(pairBank(:,1)==obj.pos(1,1)&pairBank(:,2)==obj.pos(2,1),obj.luminosities(1)),[],obj.visualFieldRect,obj.rotation);
+                
+            end
             obj.applyBackgound;
-            
+
             %main loop - start the session
             obj.sendTTL(1,true); %session start trigger (also triggers the recording start)
             WaitSecs(obj.preSessionDelay); %pre session wait time
@@ -152,9 +176,14 @@ classdef VS_rectGrid < VStim
 
                 [obj.off_Flip(i),obj.off_Stim(i),obj.off_FlipEnd(i),obj.off_Miss(i)]=Screen('Flip',obj.PTB_win,obj.on_Flip(i)+obj.actualStimDuration-0.5*obj.ifi);
                % pp(uint8(obj.trigChNames(2)),[false false],false,uint8(0),uint64(32784)); %stim offset trigger
-                   obj.sendTTL(2,false); 
+                 obj.sendTTL(2,false); 
                 % Update image buffer for the first time
-                Screen('DrawTexture',obj.PTB_win,imgTex(obj.pos(i+1),obj.luminosities(i+1)),[],obj.visualFieldRect,obj.rotation);
+                
+                if obj.pos(2,i+1)==0
+                    Screen('DrawTexture',obj.PTB_win,imgTex(obj.pos(1,i+1),obj.luminosities(i+1)),[],obj.visualFieldRect,obj.rotation);
+                else
+                    Screen('DrawTexture',obj.PTB_win,imgTex2(pairBank(:,1)==obj.pos(1,i+1)&pairBank(:,2)==obj.pos(2,i+1),obj.luminosities(i+1)),[],obj.visualFieldRect,obj.rotation);
+                end
                 obj.applyBackgound;
 
                 disp(['Trial ' num2str(i) '/' num2str(obj.nTotTrials)]);
@@ -272,9 +301,10 @@ classdef VS_rectGrid < VStim
             end
         end
         %class constractor
-        function obj=VS_rectGrid(w,h)
+        function obj=VS_rectPairs(w,h)
             %get the visual stimulation methods
             obj = obj@VStim(w); %calling superclass constructor
+            obj.inVivoSettings = true;
         end
     end
 end %EOF

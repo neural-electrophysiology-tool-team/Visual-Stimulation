@@ -20,11 +20,12 @@ classdef (Abstract) VStim < handle
         numPixels                       = 100;
         numMicrons                      = 100;
         sendMail                        = false;
-        
     end
     properties (Constant)
-        backgroudLuminance = 0;
-        maxTriggers=4;
+        backgroudLuminance = 0;             %The background luminance
+        maxTriggers=4;                      %The maximal number of triggers used for syncing
+
+        %tooltips for the different class properties
         visualFieldBackgroundLuminanceTxt   = 'The luminance of the circular visual field that is projected to the retina';
         visualFieldDiameterTxt              = 'The diameter of the circular visual field that is projected to the retina [pixels], 0 takes maximal value';
         stimDurationTxt                     = 'The duration of the visual stimuls [s]';
@@ -45,7 +46,7 @@ classdef (Abstract) VStim < handle
         centerY     % the Y coordinate of the visual field center
         actualVFieldDiameter % the actual diameter of the visual field
         nTotTrials = []; %the total number of trials in a stimulatin session
-        nPTBScreens=[];
+        nPTBScreens=[]; %number of screens to use for visual stimulation
         hInteractiveGUI %in case GUI is needed to interact with visual stimulation
     end
     
